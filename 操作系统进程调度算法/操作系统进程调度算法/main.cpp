@@ -1,9 +1,11 @@
-#include"PCB.h"
 
+#include"FCFS.h"
+#include<iostream>
+using namespace std;
 
 int main()
 {
-	InputPcb();
+	F();
     system("pause");
     return 0;
 }

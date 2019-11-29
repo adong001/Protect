@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{703B5990-EB80-43AE-87E1-61B99D59B12A}</ProjectGuid>
-    <RootNamespace>操作系统进程调度算法</RootNamespace>
+    <ProjectGuid>{5DE53660-1726-48A6-98A5-3DC5C275179D}</ProjectGuid>
+    <RootNamespace>进程调度算法</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -64,15 +64,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="RR.h" />
-    <ClInclude Include="SJF.h" />
+    <ClCompile Include="PCB.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="FCFS.cpp" />
-    <ClCompile Include="FCFS.h" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="RR.cpp" />
-    <ClCompile Include="SJF.cpp" />
+    <ClInclude Include="PCB.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
