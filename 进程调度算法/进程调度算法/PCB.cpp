@@ -1,5 +1,8 @@
 #include"PCB.h"
 
+float PCB::m_s_AverTurnaround = 0;//平均周转时间
+float PCB::m_s_AverWeighted = 0;//平均带权周转时间
+
 void PCB::InputPid()
 {
 
@@ -21,7 +24,7 @@ void PCB::OutputPid(PCB* P, int num)
 		cout << P[i].m_PidName << "\t  " << P[i].m_Arrival << "\t  " << P[i].m_Server << "\t    " << P[i].m_Finish << "\t    " << P[i].m_Turnaround << "\t    " << P[i].m_Weighted;
 		if (i + 1 == num)
 		{
-			printf(" \t\t%3.2f\t  %3.2f\n\n", g_s_AverTurnaround, g_s_AverWeighted);
+			printf(" \t\t%3.2f\t  %3.2f\n\n", PCB::m_s_AverTurnaround, PCB::m_s_AverWeighted);
 		}
 		cout << endl;
 	}
@@ -45,17 +48,26 @@ void FCFS()
 	for (auto& ip = m.begin(); ip != m.end();)
 	{
 		PCB* tmp = ip->second;
-		tmp->m_Finish = T + tmp->m_Server;
+		if (T >= tmp->m_Arrival)//上一个进程进行中这个进程已经到了内存
+		{
+			tmp->m_Finish = T + tmp->m_Server;
+			T += tmp->m_Server;
+		}
+		
+		else//map里的进程空了，直接执行下一个，T要加上等待时间(m_Arrival - T)
+		{
+			tmp->m_Finish = T + tmp->m_Server+(tmp->m_Arrival - T);
+			T += tmp->m_Server + (tmp->m_Arrival - T);
+		}
 		tmp->m_Turnaround = tmp->m_Finish - tmp->m_Arrival;
 		tmp->m_Weighted = (float)tmp->m_Turnaround / (float)tmp->m_Server;
-		g_s_AverTurnaround += tmp->m_Turnaround;
-		g_s_AverWeighted += tmp->m_Weighted;
-		T += tmp->m_Server;
+		PCB::m_s_AverTurnaround += tmp->m_Turnaround;
+		PCB::m_s_AverWeighted += tmp->m_Weighted;
 		cout << "时刻" << T << ",进程" << tmp->m_PidName << "完成，退出" << endl;
 		ip = m.erase(ip);
 	}
-	g_s_AverTurnaround /= (float)num;
-	g_s_AverWeighted /= (float)num;
+	PCB::m_s_AverTurnaround /= (float)num;
+	PCB::m_s_AverWeighted /= (float)num;
 	PCB::OutputPid(Pid, num);
 }
 
@@ -107,8 +119,8 @@ void SJF()
 		}
 		tmp->m_Turnaround = tmp->m_Finish - tmp->m_Arrival;
 			tmp->m_Weighted = (float)tmp->m_Turnaround / (float)tmp->m_Server;
-			g_s_AverTurnaround += tmp->m_Turnaround;
-			g_s_AverWeighted += tmp->m_Weighted;
+			PCB::m_s_AverTurnaround += tmp->m_Turnaround;
+			PCB::m_s_AverWeighted += tmp->m_Weighted;
 			
 			cout << "时刻" << T << ",进程" << tmp->m_PidName << "完成，退出" << endl;
 			ip = m.erase(ip);
@@ -119,8 +131,8 @@ void SJF()
 
 		}*/
 	}
-	g_s_AverTurnaround /= (float)num;
-	g_s_AverWeighted /= (float)num;
+	PCB::m_s_AverTurnaround /= (float)num;
+	PCB::m_s_AverWeighted /= (float)num;
 	PCB::OutputPid(Pid, num);
 }
 
@@ -160,8 +172,8 @@ void RR()
 				tmp->m_Finish = T;
 				tmp->m_Turnaround = tmp->m_Finish - tmp->m_Arrival;
 				tmp->m_Weighted = (float)tmp->m_Turnaround / (float)tmp->m_Server;
-				g_s_AverTurnaround += tmp->m_Turnaround;
-				g_s_AverWeighted += tmp->m_Weighted;
+				PCB::m_s_AverTurnaround += tmp->m_Turnaround;
+				PCB::m_s_AverWeighted += tmp->m_Weighted;
 				ip = m.erase(ip);
 			}
 			else if (ip->second->m_Server - q > 0)
@@ -178,14 +190,14 @@ void RR()
 				tmp->m_Finish = T;
 				tmp->m_Turnaround = tmp->m_Finish - tmp->m_Arrival;
 				tmp->m_Weighted = (float)tmp->m_Turnaround / (float)tmp->m_Server;
-				g_s_AverTurnaround += tmp->m_Turnaround;
-				g_s_AverWeighted += tmp->m_Weighted;
+				PCB::m_s_AverTurnaround += tmp->m_Turnaround;
+				PCB::m_s_AverWeighted += tmp->m_Weighted;
 				ip = m.erase(ip);
 			}
 		}
 	}
-	g_s_AverTurnaround /= (float)num;
-	g_s_AverWeighted /= (float)num;
+	PCB::m_s_AverTurnaround /= (float)num;
+	PCB::m_s_AverWeighted /= (float)num;
 	PCB::OutputPid(Pid, num);
 
 }

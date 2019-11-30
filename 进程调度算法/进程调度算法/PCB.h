@@ -4,8 +4,6 @@
 #include<map>
 using namespace std;
 
-static float g_s_AverTurnaround = 0;//平均周转时间
-static float g_s_AverWeighted = 0 ;//平均带权周转时间
 
 class PCB
 {
@@ -16,6 +14,8 @@ private:
 	int m_Finish;//进程完成时间
 	int m_Turnaround;//周转时间
 	float m_Weighted;//带权周转时间
+	static float m_s_AverTurnaround;//平均周转时间
+	static float m_s_AverWeighted;//平均带权周转时间
 	
 public:
 	friend void FCFS();
@@ -24,6 +24,7 @@ public:
 	void InputPid();
 	static void OutputPid(PCB* P, int num);
 };
+
 
 void FCFS();
 void SJF();
