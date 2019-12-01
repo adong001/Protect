@@ -6,6 +6,19 @@ using namespace std;
 int main()
 {
 
+	/*int ar[] = { 1, 2, 3, 4, 5 };
+	list<int> l;
+	for (auto&e : ar)
+	{
+		l.push_back(e);
+	}
+	auto ip = l.begin();
+	ip++;
+	ip++;
+	ip++;
+	ip++;
+	ip++;
+	cout << *ip << endl;*/
 
 	int chose;
 	while (1)
