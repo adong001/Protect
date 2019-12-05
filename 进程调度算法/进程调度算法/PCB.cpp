@@ -162,101 +162,67 @@ void RR()
 	cin >> q;
 
 	PCB* Pid = new PCB[num];
-	multimap<int, PCB*> ma;
+	multimap<int, PCB*> ma,ma2;
 
 	for (int i = 0; i < num; i++)
 	{
 		Pid[i].InputPid();
 		ma.insert(make_pair(Pid[i].m_Arrival, Pid + i));
 	}
-	list<PCB*> la;//push进la，时间片轮转不需要排序，将la中的数据轮转置空即可
-	for (auto& e : ma)
-	{
-		la.push_back(e.second);
-	}
+	queue<PCB*> qu;
 
 	T = ma.begin()->second->m_Arrival;//取第一个到达内存的进程
-
-	auto ip = la.begin();
-	while (!la.empty())//la为空，轮转完毕
+	auto ipma = ma.begin();
+	while (!ma.empty())//ma为空，轮转完毕
 	{
-		if (ip == la.end())//让其循环起来
+		for (;ipma != ma.end(); ipma++)//找到所有到达的进程push进队列
 		{
-			ip = la.begin();
-		}
-
-		if (T >= (*ip)->m_Arrival)//进程已到达
-		{
-			auto ip1 = ip;
-			int MinArrival = (*ip)->m_Arrival;
-			ip++;
-			while (ip != la.end() && T >= (*ip)->m_Arrival)//找最先到的进程
+			if (T >= ipma->second->m_Arrival)
 			{
-				if ((*ip)->m_Arrival < T)
+				qu.push(ipma->second);
+			}
+		}
+		auto ip = qu.front();
+		if (ip)
+		{
+			if (ip->m_Server - q == 0)//刚好减完
+			{
+				T += q;
+				cout << "时刻" << T << ",进程" << ip->m_PidName << "完成，退出" << endl;
+				ip->m_Server -= q;//注意：此算法中每次运行到一个进程时会给他的服务时间减去一个时间片(减完大于0)
+				ip->m_Finish = T;
+				ip->m_Turnaround = ip->m_Finish - ip->m_Arrival;
+				ip->m_Weighted = (float)ip->m_Turnaround / (float)ip->m_Server;
+				PCB::m_s_AverTurnaround += ip->m_Turnaround;
+				PCB::m_s_AverWeighted += ip->m_Weighted;
+			}
+			else if (ip->m_Server - q > 0)
+			{
+				T += q;
+				ip->m_Arrival += q;//到达时间也跟着变化
+				ip->m_Server -= q;
+				ip++;
+			}
+			else//剩余服务时间超过时间片
+			{
+				T += ip->m_Server;
+				cout << "时刻" << T << ",进程" << ip->m_PidName << "完成，退出" << endl;
+				ip->m_Server = 0;
+				ip->m_Finish = T;
+				ip->m_Turnaround = ip->m_Finish - ip->m_Arrival;
+				ip->m_Weighted = (float)ip->m_Turnaround / (float)ip->m_Server;
+				PCB::m_s_AverTurnaround += ip->m_Turnaround;
+				PCB::m_s_AverWeighted += ip->m_Weighted;
+			}
+			for (auto& e : ma)
+			{
+				if (e.second == qu.front())
 				{
-					MinArrival = (*ip)->m_Arrival;
-					ip1 = ip;
-				}
-				else
-				{
-					ip++;
+					ipma = qu
 				}
 			}
-			ip = ip1;
+			qu.pop();
 		}
-		else//进程未到达,跟上面到达的做法一直，先找到最先到达的进程，在判断其执行一个时间片后的情况
-		{
-			auto ip2 = ip;
-			int MinArrival2 = (*ip)->m_Arrival;
-			ip++;
-			while (ip != la.end() && T >= (*ip)->m_Arrival)//找最先到的进程
-			{
-				if ((*ip)->m_Arrival < T)
-				{
-					MinArrival2 = (*ip)->m_Arrival;
-					ip2 = ip;
-				}
-				else
-				{
-					ip++;
-				}
-			}
-			ip = ip2;
-		}
-
-		if ((*ip)->m_Server - q == 0)//刚好减完
-		{
-			T += q;
-			cout << "时刻" << T << ",进程" << (*ip)->m_PidName << "完成，退出" << endl;
-			(*ip)->m_Server -= q;//注意：此算法中每次运行到一个进程时会给他的服务时间减去一个时间片(减完大于0)
-			(*ip)->m_Finish = T;
-			(*ip)->m_Turnaround = (*ip)->m_Finish - (*ip)->m_Arrival;
-			(*ip)->m_Weighted = (float)(*ip)->m_Turnaround / (float)(*ip)->m_Server;
-			PCB::m_s_AverTurnaround += (*ip)->m_Turnaround;
-			PCB::m_s_AverWeighted += (*ip)->m_Weighted;
-			ip = la.erase(ip);
-		}
-		else if ((*ip)->m_Server - q > 0)
-		{
-			T += q;
-			(*ip)->m_Arrival += q;//到达时间也跟着变化
-			(*ip)->m_Server -= q;
-			ip++;
-		}
-		else//剩余服务时间超过时间片
-		{
-			T += (*ip)->m_Server;
-			cout << "时刻" << T << ",进程" << (*ip)->m_PidName << "完成，退出" << endl;
-			(*ip)->m_Server = 0;
-			(*ip)->m_Finish = T;
-			(*ip)->m_Turnaround = (*ip)->m_Finish - (*ip)->m_Arrival;
-			(*ip)->m_Weighted = (float)(*ip)->m_Turnaround / (float)(*ip)->m_Server;
-			PCB::m_s_AverTurnaround += (*ip)->m_Turnaround;
-			PCB::m_s_AverWeighted += (*ip)->m_Weighted;
-			ip = la.erase(ip);
-		}
-		ip++;
-		//ip = la.begin();//每次找完后，回到开始位置，继续判断
 	}
 	PCB::m_s_AverTurnaround /= (float)num;
 	PCB::m_s_AverWeighted /= (float)num;
