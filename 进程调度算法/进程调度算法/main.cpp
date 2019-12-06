@@ -3,6 +3,14 @@
 #include<iostream>
 using namespace std;
 
+//class Compare{
+//public:
+//	bool operator ()(int a, int b)
+//	{
+//		return 1<2;
+//	}
+//};
+
 int main()
 {
 
@@ -19,7 +27,18 @@ int main()
 	ip++;
 	ip++;
 	cout << *ip << endl;*/
-
+	//map<int, string> m;
+	//m.insert(make_pair(3, "C"));
+	//m.insert(make_pair(1, "A"));
+	//m.insert(make_pair(2, "B"));
+	//map<int, string, Compare> mm;
+	//mm.insert(make_pair(3, "C"));
+	//mm.insert(make_pair(1, "A"));
+	//mm.insert(make_pair(2, "B"));
+	//for (auto&e : mm)
+	//{
+	//	cout << e.first << " " << e.second << endl;
+	//}
 	int chose;
 	while (1)
 	{

@@ -37,6 +37,7 @@ void ReadData()//读入数据
 	{
 		readData >> pcb[i].m_PidSize;
 	}
+	readData.close();
 }
 
 void FirstFit()//首次适应算法
