@@ -26,7 +26,8 @@ int main()
 		cin >> choose;
 		switch (choose)
 		{
-			case 0:break;
+			
+			case 0:exit(0); break;
 			case 1:FirstFit(); break;
 			case 2:NextFit(); break;
 			case 3:BestFit(); break;

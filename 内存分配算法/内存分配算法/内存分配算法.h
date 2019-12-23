@@ -4,16 +4,16 @@
 #include<string>
 #include<vector>
 #include<functional>
+#include<cstdlib>
 #include<map>
-#define MIN 3
+#include<set>
 using namespace std;
-
 typedef struct//分区
 {
 	static int PartitionNum;//分区数量 
-	int m_PartitionId;//分区号
-	int m_Capacity;//分区容量
-	int m_PartitionSize;//分区大小
+	int m_PartitionId;//分区首地容量址
+	int m_PartitionSize;//分区
+	int m_BlockId;//空白分区首地址
 }Partition;
 
 typedef struct//进程控制块
@@ -24,6 +24,8 @@ typedef struct//进程控制块
 }PCB;
 
 void ReadData();//读入数据
+void Display1();
+void Display_Partition();
 void Display();//输出分区完后各个分区的状态
 void Display_PCB();//显示进程的状态
 void FirstFit();//首次适应算法
