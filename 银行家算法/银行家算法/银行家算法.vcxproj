@@ -66,6 +66,7 @@
   <ItemGroup>
     <ClCompile Include="Banker.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Banker.h" />
