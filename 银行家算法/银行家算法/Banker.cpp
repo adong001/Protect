@@ -23,7 +23,6 @@ void Display()
 	int i, j, tmp;
 
 	//1.打印表头
-	printf("当前时刻资源分配表\n");
 	printf("|—————————————————————————————————————————-|\n");
 	printf("%-8s%-19s%-19s%-19s%-20s", "|进\\资源", "|       Max        ", "|    Allocation    ", "|       Need       ", "|     Available    |\n");
 	printf("|   \\情 |—————————|—————————|—————————|—————————|\n");
@@ -308,10 +307,10 @@ void Require()//进程请求资源
 
 	switch (retval.second)
 	{
-	case NEED_REQUEST:cout << "\n分配失败！此进程所需资源超过它宣布的最大需求！！！\n\n"; break;
-	case AVAILABLE_REQUEST:cout << "\n分配失败！此进程所需资源超过系统资源！！！\n\n"; break;
-	case SUCCESS:cout << "\n分配成功！\n"; Display_Security(retval); break;
-	case FAIL:cout << "\n分配失败！此次分配会导致系统进出入不安全状态！！！\n"; Display_Security(retval); break;
+	case NEED_REQUEST:cout << "\n请求出错！此进程请求资源超过它宣布的最大需求！！！\n"; cout << "当前时刻资源分配表\n"; Display(); break;
+	case AVAILABLE_REQUEST:cout << "\n请求出错！此请求所需资源超过系统资源，P" << Pid << "进程等待！！！\n"; cout << "当前时刻资源分配表\n"; Display(); ; break;
+	case SUCCESS:cout << "\n预分配成功！\n"; Display_Security(retval); cout << "当前时刻资源分配表\n"; Display(); break;
+	case FAIL:cout << "\n分配失败！此次分配会导致系统进出入不安全状态！！！\n"; Display_Security(retval); cout << "当前时刻资源分配表\n"; Display(); break;
 	}
 }
 
@@ -338,15 +337,18 @@ pair<vector<int>, Status> AlgoBanker(int Pid, vector<int>& Requset)//银行家算法,
 			Allocation[Pid][i] += Requset[i];
 			Need[Pid][i] -= Requset[i];
 		}
-		retval = AlgoSecurity()
+		cout << "预分配状态表：\n";
+		Display();
+		retval = AlgoSecurity();
 
 		if (retval.second == SECURITY)//若处于安全状态
 		{
-			if (Need[Pid] == 0)//不在需求资源，回收
+			if (Need[Pid] == 0)//不再需求资源，回收
 			{
 				for (int i = 0; i < Available.size(); i++)
 				{
 					Available[i] += Allocation[Pid][i];
+					Allocation[Pid][i] = 0;
 				}
 			}
 			else//这次请求后还未完成(Need[Pid]!=0)，不能回收
@@ -355,7 +357,7 @@ pair<vector<int>, Status> AlgoBanker(int Pid, vector<int>& Requset)//银行家算法,
 			}
 			retval.second = SUCCESS;//分配成功
 		}
-		else//不是状态，本次分配作废，回复原来状态。此进程等待
+		else//不是安全状态，本次分配作废，回复原来状态。此进程等待
 		{
 			for (int i = 0; i < Available.size(); i++)
 			{
