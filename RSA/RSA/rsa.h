@@ -5,17 +5,18 @@
 #include<ctime>
 #include<string>
 #include<fstream>
-#include<xutility>
+//#include<xutility>
+#include <boost/multiprecision/random.hpp>
 #include<boost/multiprecision/cpp_int.hpp>
 #include<boost/multiprecision/miller_rabin.hpp>//大素数检测
-#define NUMBER 256   //一次加密NUMBER个字节大小的数据
-#define OFFSET 512   //钥匙的位数
+#define NUMBER 10   //一次加密NUMBER个字节大小的数据
+#define OFFSET 40  //钥匙的位数
 
 using namespace std;
 namespace mp = boost::multiprecision;
 namespace rp = boost::random;
 //typedef long DataType;
-typedef mp::uint1024_t DataType;//DataType是一个任意位的大数
+typedef mp::cpp_int DataType;//DataType是一个任意位的大数
 
 
 struct Key
@@ -37,7 +38,10 @@ struct Key
 class RSA
 {
 private:
+
 	Key m_key;
+	
+
 public:
 	void ProdureKeyFile(const char* ekey_file, const char* dkey_file, const char* pkey_file);//产生钥匙文件
 	DataType ExGcd(DataType a, DataType b, DataType& x, DataType& y);//求模范元素(公钥e)

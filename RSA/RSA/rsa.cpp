@@ -31,33 +31,8 @@ void RSA::ProdureKeyFile(const char* ekey_file, const char* dkey_file, const cha
 
 void RSA::Encrypt(const char* filename, const char* fileout)//文件加密
 {
-	//DataType m_eKey("512978033300805572280865");
-	//DataType m_pKey("982348807953060486445057");
-	//DataType m_dKey("123192531317109461264545");
-	//DataType original = 'h';
-	//DataType decout = Encrypt(original, m_eKey, m_pKey);
-	//cout << "original:" << original << endl;
-	//cout << "ecrept:" << decout << endl;
-	//cout << "decrept:" << Decrypt(decout, m_dKey, m_dKey);
-	//cout << endl << endl;
-
-	//original = 'e';
-	//decout = Encrypt(original,m_eKey, m_pKey);
-	//cout << "original:" << original << endl;
-	//cout << "ecrept:" << decout << endl;
-	//cout << "decrept:" <<Decrypt(decout,m_dKey,m_pKey);
-	//cout << endl << endl;
-
- //    original = 'l';
- //    decout = Encrypt(original,m_eKey, m_pKey);
-	//cout << "original:" << original << endl;
-	//cout << "ecrept:" << decout << endl;
-	//cout << "decrept:" <<Decrypt(decout,m_dKey,m_pKey);
-	//cout << endl << endl;
-
-
-	ifstream fin(filename, ifstream::binary);
-	ofstream fout(fileout, ofstream::binary);
+	ifstream fin(filename,ifstream::binary);
+	ofstream fout(fileout,ofstream::binary);
 	if (!fin.is_open())
 	{
 		perror("input file open failed\n");
@@ -65,15 +40,17 @@ void RSA::Encrypt(const char* filename, const char* fileout)//文件加密
 	}
 	
 	int length = sizeof(DataType);
-	char* bufferin = new char[NUMBER]; 
-	DataType* bufferout = new DataType[NUMBER];
+	char bufferin[NUMBER]; 
+	DataType bufferout[NUMBER];
 	int curNum;
-
 	while (!fin.eof())
 	{
 		fin.read(bufferin, NUMBER);//每次读NUMBER个字节的数据
 		curNum = fin.gcount();//真正读到的字节数，有可能后面读到空
 		int i;
+		cout << "m_eKey = " << m_key.m_eKey << endl;
+		cout << "m_dKey = " << m_key.m_dKey << endl;
+		cout << "m_pKey = " << m_key.m_pKey << endl;
 		for (i = 0; i < curNum; i++)
 		{
 			
@@ -82,70 +59,88 @@ void RSA::Encrypt(const char* filename, const char* fileout)//文件加密
 			cout << bufferin[i] << endl;
 			cout << bufferout[i]  << endl;
 		}
-		//cout << endl;
-		//cout << bufferout[0] << endl;
-		//cout << bufferout[1] << endl;
-		//cout << bufferout[2] << endl;
-		//cout << bufferout[3] << endl;
-		//cout << bufferout[4] << endl;
-		//
-		fout.write((char*)(bufferout), curNum * length);
+		fout.write((char*)bufferout, curNum * length);
 		//因为每次将一个字节加密成一个DataType型，共加密curNum次，bufferout每个元素大小为length
 		//所以要向fout写入curNum * length个字节
 	}
-	delete[] bufferin;
-	delete[] bufferout;
+	//fout.write("hello", 5);
 	fin.close();
 	fout.close();
-}
 
-void RSA::Decrypt(const char* filename, const char* fileout)//文件解密
-{
-
-	ifstream fin(filename, ifstream::binary);
-	ofstream fout(fileout, ofstream::binary);
-	if (!fin.is_open())
+	ifstream fin1("加密文件.txt", ifstream::binary);
+	ofstream fout1("解密文件.txt", ofstream::binary);
+	if (!fin1.is_open())
 	{
 		perror("input file open failed\n");
 		return;
-	}	
-	
-	int length = sizeof(DataType);
-	int curNum;
+	}
 
-    DataType* bufferin = new DataType[NUMBER];
-	char* bufferout = new char[NUMBER];
-
-	while (!fin.eof())
+	DataType* bufferin1 = new DataType[NUMBER];
+	char* bufferout1 = new char[NUMBER];
+	while (!fin1.eof())
 	{
-		fin.read((char*)bufferin, NUMBER * length);//每次读NUMBER个DataType字节的数据
-		cout << bufferin[0] << endl;
-		curNum = fin.gcount();//真正读到的字节数，有可能后面读到空
+		fin1.read((char*)bufferin1, NUMBER * length);//每次读NUMBER个DataType字节的数据
+		curNum = fin1.gcount();//真正读到的字节数，有可能后面读到空
 		curNum /= length;//真正读到curNum个DataType字节的数据，下面就解密curNum次
 		int i;
-		cout << "\n\n\n";
+		cout << "-----------------\n";
+		cout << "m_eKey = " << m_key.m_eKey << endl;
+		cout << "m_dKey = " << m_key.m_dKey << endl;
+		cout << "m_pKey = " << m_key.m_pKey << endl;
 		for (i = 0; i < curNum; i++)
 		{
 			//每次以datatype为单位进行解密，curnum个datatype字节的数据，共解密curnum次
 			//每次将一个datatype为单位的数据解密成一个字节的数据，写入bufferout缓冲区中
-			bufferout[i] = (char)Decrypt(bufferin[i], m_key.m_dKey, m_key.m_pKey);
-			cout << bufferin[i] << endl;
-			cout << bufferout[i] << endl;
+			bufferout1[i] = (char)Decrypt(bufferin1[i], m_key.m_dKey, m_key.m_pKey);
+			cout << bufferin1[i] << endl;
+			cout << bufferout1[i] << endl;
 		}
-		cout << endl;
-		cout << bufferout[0] << endl;
-		cout << bufferout[1] << endl;
-		cout << bufferout[2] << endl;
-		cout << bufferout[3] << endl;
-		cout << bufferout[4] << endl;
-		fout.write(bufferout, curNum);
+		fout.write(bufferout1, curNum);
 		//解密curNum次，就得到curNum字节得数据，写入fout文件中
 	}
-	delete[] bufferin;
-	delete[] bufferout;
-	fin.close();
-	fout.close();
+	//delete[]bufferin1;
+	delete[]bufferout1;
+	fin1.close();
+	fout1.close();
 }
+
+//void RSA::Decrypt(const char* filename, const char* fileout)//文件解密
+//{
+//	ifstream fin(filename ,ifstream::binary);
+//	ofstream fout(fileout ,ofstream::binary);
+//	if (!fin.is_open())
+//	{
+//		perror("input file open failed\n");
+//		return;
+//	}	
+//	int length = sizeof(DataType);
+//	int curNum;
+//    DataType bufferin[NUMBER];
+//	char bufferout[NUMBER];
+//	while (!fin.eof())
+//	{
+//		fin.read((char*)bufferin, NUMBER * length);//每次读NUMBER个DataType字节的数据
+//		curNum = fin.gcount();//真正读到的字节数，有可能后面读到空
+//		curNum /= length;//真正读到curNum个DataType字节的数据，下面就解密curNum次
+//		int i;
+//		cout << "-----------------\n";
+//		cout << "m_eKey = " << m_key.m_eKey << endl;
+//	    cout << "m_dKey = " << m_key.m_dKey << endl;
+//	    cout << "m_pKey = " << m_key.m_pKey << endl;
+//		for (i = 0; i < curNum; i++)
+//		{
+//			//每次以datatype为单位进行解密，curnum个datatype字节的数据，共解密curnum次
+//			//每次将一个datatype为单位的数据解密成一个字节的数据，写入bufferout缓冲区中
+//			bufferout[i] = (char)Decrypt(bufferin[i], m_key.m_dKey, m_key.m_pKey);
+//			cout << bufferin[i] << endl;
+//			cout << bufferout[i] << endl;
+//		}
+//		fout.write(bufferout, curNum);
+//		//解密curNum次，就得到curNum字节得数据，写入fout文件中
+//	}
+//	fin.close();
+//	fout.close();
+//}
 
 DataType RSA::Encrypt(DataType data, DataType ekey, DataType pkey)//加密函数
 {
@@ -186,10 +181,9 @@ DataType RSA::Decrypt(DataType data, DataType dkey, DataType pkey)//解密函数
 
 DataType RSA::GetPrime()//获取素数
 {
-	rp::mt19937 gen(time(NULL));
+	rp::mt19937 gen((unsigned int)time(NULL));
 	rp::uniform_int_distribution<DataType> dist(2, DataType(1) << OFFSET);
-	//随机获取一个128位的大数
-	srand(time(NULL));  
+	//随机获取一个128位的大数  
 	DataType prime;
 	while (true)
 	{
@@ -199,13 +193,12 @@ DataType RSA::GetPrime()//获取素数
 			break;
 		}
 	}
-	cout << "prime = " << prime << endl;
 	return prime;
 }
 
 bool RSA::IsPrime(DataType data)//判断是否为素数
 {
-	rp::mt11213b gen(time(nullptr));
+	rp::mt11213b gen((unsigned int)time(nullptr));
 	if (mp::miller_rabin_test(data, 25, gen))
 	{
 		if (mp::miller_rabin_test((data - 1) / 2, 25, gen))
@@ -230,8 +223,8 @@ DataType RSA::GetOrla(DataType prime1, DataType prime2)//欧拉函数，
 DataType RSA::GetEKey(DataType orla)//获取加密秘钥e
 {
 	//1 < e < f(n)
-	rp::mt19937 gen(time(NULL));
-	rp::uniform_int_distribution<DataType> dist(2,orla);//获取一个2--orla的大数
+	rp::mt19937 gen((unsigned int)time(NULL));
+	rp::uniform_int_distribution<DataType> dist(2, orla - 1);//获取一个2--orla的大数
 	
 	//srand(time(NULL));
 	DataType ekey;
@@ -239,7 +232,7 @@ DataType RSA::GetEKey(DataType orla)//获取加密秘钥e
 	{
 		ekey = dist(gen);
 		//ekey = rand() % orla;//模后肯定小于f(n)
-		if (ekey > 1 && GetGcd(ekey, orla) == 1)//1 < e < orla e与orla互质(最大公约数=1)
+		if (GetGcd(ekey, orla) == 1)//1 < e < orla e与orla互质(最大公约数=1)
 		{
 			return ekey;
 		}
@@ -249,22 +242,10 @@ DataType RSA::GetEKey(DataType orla)//获取加密秘钥e
 DataType RSA::GetDKey(DataType ekey, DataType orla)//获取解密秘钥d
 {
 	// e * d % f(n) = 1  (f(n) = orla)
-	DataType x(0);
-	DataType y(0);
+	DataType x, y;
 	ExGcd(ekey, orla, x, y);
 	//变换，让私钥d是一个比较小的值
 	return (x % orla + orla) % orla;
-	/*DataType dkey = orla / ekey;
-	while (true)
-	{
-		if ((dkey * ekey) % orla == 1)
-		{
-			return dkey;
-		}
-		++dkey;
-	}
-	return dkey;*/
-	
 }
 DataType RSA::GetGcd(DataType data1, DataType data2)//获取两个数的最大公约数
 {
@@ -279,11 +260,13 @@ DataType RSA::GetGcd(DataType data1, DataType data2)//获取两个数的最大公约数
 void RSA::GetKeys()
 {
 	DataType prime1 = GetPrime();
+	cout << "prime1 = " << prime1 << endl;
 	DataType prime2 = GetPrime();
 	while (prime1 == prime2)
 	{
 		prime2 = GetPrime();
 	}
+	cout << "prime2 = " << prime2 << endl;
 
 	DataType orla = GetOrla(prime1, prime2);
 
