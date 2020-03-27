@@ -9,7 +9,7 @@
 #include <boost/multiprecision/random.hpp>
 #include<boost/multiprecision/cpp_int.hpp>
 #include<boost/multiprecision/miller_rabin.hpp>//大素数检测
-#define NUMBER 10   //一次加密NUMBER个字节大小的数据
+#define NUMBER 64   //一次加密NUMBER个字节大小的数据
 #define OFFSET 40  //钥匙的位数
 
 using namespace std;

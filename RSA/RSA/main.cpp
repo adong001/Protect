@@ -23,8 +23,8 @@ void test_file()
 {
 	RSA rsa;
 	rsa.GetKeys();
-	rsa.Encrypt("原文件.txt", "加密文件. txt");
-	//rsa.Decrypt("加密文件.txt", "解密文件.txt");
+	rsa.Encrypt("src.txt", "enc.txt");
+	rsa.Decrypt("enc.txt", "dec.txt");
 }
 
 

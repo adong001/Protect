@@ -29,7 +29,7 @@ void RSA::ProdureKeyFile(const char* ekey_file, const char* dkey_file, const cha
 	fp.close();
 }
 
-void RSA::Encrypt(const char* filename, const char* fileout)//文件加密
+void RSA::Encrypt(const char* filename,const char* fileout)//文件加密
 {
 	ifstream fin(filename,ifstream::binary);
 	ofstream fout(fileout,ofstream::binary);
@@ -63,84 +63,47 @@ void RSA::Encrypt(const char* filename, const char* fileout)//文件加密
 		//因为每次将一个字节加密成一个DataType型，共加密curNum次，bufferout每个元素大小为length
 		//所以要向fout写入curNum * length个字节
 	}
-	//fout.write("hello", 5);
 	fin.close();
 	fout.close();
+}
 
-	ifstream fin1("加密文件.txt", ifstream::binary);
-	ofstream fout1("解密文件.txt", ofstream::binary);
-	if (!fin1.is_open())
+void RSA::Decrypt(const char* filename, const char* fileout)//文件解密
+{
+	ifstream fin(filename ,ifstream::binary);
+	ofstream fout(fileout ,ofstream::binary);
+	if (!fin.is_open())
 	{
 		perror("input file open failed\n");
 		return;
-	}
-
-	DataType* bufferin1 = new DataType[NUMBER];
-	char* bufferout1 = new char[NUMBER];
-	while (!fin1.eof())
+	}	
+	int length = sizeof(DataType);
+	int curNum;
+	DataType bufferin[NUMBER] = {0};
+	char bufferout[NUMBER] = {0};
+	while (!fin.eof())
 	{
-		fin1.read((char*)bufferin1, NUMBER * length);//每次读NUMBER个DataType字节的数据
-		curNum = fin1.gcount();//真正读到的字节数，有可能后面读到空
+		fin.read((char*)bufferin, NUMBER * length);//每次读NUMBER个DataType字节的数据
+		curNum = fin.gcount();//真正读到的字节数，有可能后面读到空
 		curNum /= length;//真正读到curNum个DataType字节的数据，下面就解密curNum次
 		int i;
 		cout << "-----------------\n";
 		cout << "m_eKey = " << m_key.m_eKey << endl;
-		cout << "m_dKey = " << m_key.m_dKey << endl;
-		cout << "m_pKey = " << m_key.m_pKey << endl;
+	    cout << "m_dKey = " << m_key.m_dKey << endl;
+	    cout << "m_pKey = " << m_key.m_pKey << endl;
 		for (i = 0; i < curNum; i++)
 		{
 			//每次以datatype为单位进行解密，curnum个datatype字节的数据，共解密curnum次
 			//每次将一个datatype为单位的数据解密成一个字节的数据，写入bufferout缓冲区中
-			bufferout1[i] = (char)Decrypt(bufferin1[i], m_key.m_dKey, m_key.m_pKey);
-			cout << bufferin1[i] << endl;
-			cout << bufferout1[i] << endl;
+			bufferout[i] = (char)Encrypt(bufferin[i], m_key.m_dKey, m_key.m_pKey);
+			cout << bufferin[i] << endl;
+			cout << bufferout[i] << endl;
 		}
-		fout.write(bufferout1, curNum);
+		fout.write(bufferout, curNum);
 		//解密curNum次，就得到curNum字节得数据，写入fout文件中
 	}
-	//delete[]bufferin1;
-	delete[]bufferout1;
-	fin1.close();
-	fout1.close();
+	fin.close();
+	fout.close();
 }
-
-//void RSA::Decrypt(const char* filename, const char* fileout)//文件解密
-//{
-//	ifstream fin(filename ,ifstream::binary);
-//	ofstream fout(fileout ,ofstream::binary);
-//	if (!fin.is_open())
-//	{
-//		perror("input file open failed\n");
-//		return;
-//	}	
-//	int length = sizeof(DataType);
-//	int curNum;
-//    DataType bufferin[NUMBER];
-//	char bufferout[NUMBER];
-//	while (!fin.eof())
-//	{
-//		fin.read((char*)bufferin, NUMBER * length);//每次读NUMBER个DataType字节的数据
-//		curNum = fin.gcount();//真正读到的字节数，有可能后面读到空
-//		curNum /= length;//真正读到curNum个DataType字节的数据，下面就解密curNum次
-//		int i;
-//		cout << "-----------------\n";
-//		cout << "m_eKey = " << m_key.m_eKey << endl;
-//	    cout << "m_dKey = " << m_key.m_dKey << endl;
-//	    cout << "m_pKey = " << m_key.m_pKey << endl;
-//		for (i = 0; i < curNum; i++)
-//		{
-//			//每次以datatype为单位进行解密，curnum个datatype字节的数据，共解密curnum次
-//			//每次将一个datatype为单位的数据解密成一个字节的数据，写入bufferout缓冲区中
-//			bufferout[i] = (char)Decrypt(bufferin[i], m_key.m_dKey, m_key.m_pKey);
-//			cout << bufferin[i] << endl;
-//			cout << bufferout[i] << endl;
-//		}
-//		fout.write(bufferout, curNum);
-//		//解密curNum次，就得到curNum字节得数据，写入fout文件中
-//	}
-//	fin.close();
-//	fout.close();
-//}
 
 DataType RSA::Encrypt(DataType data, DataType ekey, DataType pkey)//加密函数
 {
