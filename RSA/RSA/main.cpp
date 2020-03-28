@@ -8,13 +8,13 @@ void test_key()
 	{
 		rsa.GetKeys();
 		Key key = rsa.GetAllKey();
-		cout << "key._eKey:" << key.m_eKey << "\n" << "key._dKey:" <<key.m_dKey << "\n" << "key._pKey:" << key.m_pKey << endl;
+		std::cout << "key._eKey:" << key.m_eKey << "\n" << "key._dKey:" << key.m_dKey << "\n" << "key._pKey:" << key.m_pKey << std::endl;
 		DataType original = 10 ;
 		DataType decout = rsa.Encrypt(original, key.m_eKey, key.m_pKey);
-		cout << "original:" << original << endl;
-		cout << "ecrept:" << decout << endl;
-		cout << "decrept:" << rsa.Decrypt(decout, key.m_dKey, key.m_pKey);
-		cout << endl << endl;
+		std::cout << "original:" << original << std::endl;
+		std::cout << "ecrept:" << decout << std::endl;
+		std::cout << "decrept:" << rsa.Decrypt(decout, key.m_dKey, key.m_pKey);
+		std::cout << std::endl << std::endl;
 		k--;
 	}
 }

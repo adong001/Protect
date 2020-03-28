@@ -12,7 +12,6 @@
 #define NUMBER 64   //一次加密NUMBER个字节大小的数据
 #define OFFSET 40  //钥匙的位数
 
-using namespace std;
 namespace mp = boost::multiprecision;
 namespace rp = boost::random;
 //typedef long DataType;
