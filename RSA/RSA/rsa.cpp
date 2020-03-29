@@ -1,12 +1,12 @@
 #include"rsa.h"
 
-void RSA::ProdureKeyFile(const char* ekey_file, const char* dkey_file, const char* pkey_file)//产生钥匙文件
+//产生钥匙文件
+void RSA::ProdureKeyFile(const char* ekey_file, const char* dkey_file, const char* pkey_file)
 {
-	int keys = 3;
-	int length = sizeof(DataType);
-	std::ofstream fe(ekey_file);
-	std::ofstream fd(dkey_file);
-	std::ofstream fp(pkey_file);
+	int keys = KEYS;
+	std::ofstream fe(ekey_file, std::ofstream::binary);
+	std::ofstream fd(dkey_file, std::ofstream::binary);
+	std::ofstream fp(pkey_file, std::ofstream::binary);
 
 	while (keys--)
 	{
@@ -15,18 +15,24 @@ void RSA::ProdureKeyFile(const char* ekey_file, const char* dkey_file, const cha
 		while (prime1 == prime2)
 		{
 			prime2 = GetPrime();
-		}
+		} 
 		DataType orla = GetOrla(prime1, prime2);
-		DataType pKey = GetPKey(prime1, prime2);
-		DataType eKey = GetEKey(orla);
-		DataType dKey = GetDKey(m_key.m_eKey, orla);
-		fe.write((char*)&eKey, length);
-		fd.write((char*)&dKey, length);
-		fp.write((char*)&pKey, length);
+		m_key.m_eKey = GetEKey(orla);
+		m_key.m_dKey = GetDKey(m_key.m_eKey, orla);
+		m_key.m_pKey = GetPKey(prime1, prime2);
+		fe.write((char*)&m_key.m_eKey, LENGTH);
+		fd.write((char*)&m_key.m_dKey, LENGTH);
+		fp.write((char*)&m_key.m_pKey, LENGTH);
+		std::cout << "------------------------" << std::endl;
+		std::cout << "m_eKey = " << m_key.m_eKey << std::endl;
+		std::cout << "m_dKey = " << m_key.m_dKey << std::endl;
+		std::cout << "m_pKey = " << m_key.m_pKey << std::endl;
+		std::cout << "------------------------" << std::endl;
 	}
 	fe.close();
 	fd.close();
 	fp.close();
+
 }
 
 void RSA::Encrypt(const char* filename,const char* fileout)//文件加密
@@ -39,7 +45,6 @@ void RSA::Encrypt(const char* filename,const char* fileout)//文件加密
 		return;
 	}
 	
-	int length = sizeof(DataType);
 	char bufferin[NUMBER]; 
 	DataType bufferout[NUMBER];
 	int curNum;
@@ -56,10 +61,9 @@ void RSA::Encrypt(const char* filename,const char* fileout)//文件加密
 			
 			bufferout[i] = Encrypt((DataType)bufferin[i], m_key.m_eKey, m_key.m_pKey);
 			//每次将一个字节加密成一个DataType型，写入bufferout缓冲区中
-			std::cout << bufferin[i] << std::endl;
-			std::cout << bufferout[i] << std::endl;
+			std::cout << bufferin[i] << "  被加密成  " << bufferout[i] << std::endl;
 		}
-		fout.write((char*)bufferout, curNum * length);
+		fout.write((char*)bufferout, curNum * LENGTH);
 		//因为每次将一个字节加密成一个DataType型，共加密curNum次，bufferout每个元素大小为length
 		//所以要向fout写入curNum * length个字节
 	}
@@ -76,15 +80,14 @@ void RSA::Decrypt(const char* filename, const char* fileout)//文件解密
 		perror("input file open failed\n");
 		return;
 	}	
-	int length = sizeof(DataType);
 	int curNum;
 	DataType bufferin[NUMBER] = {0};
 	char bufferout[NUMBER] = {0};
 	while (!fin.eof())
 	{
-		fin.read((char*)bufferin, NUMBER * length);//每次读NUMBER个DataType字节的数据
+		fin.read((char*)bufferin, NUMBER * LENGTH);//每次读NUMBER个DataType字节的数据
 		curNum = fin.gcount();//真正读到的字节数，有可能后面读到空
-		curNum /= length;//真正读到curNum个DataType字节的数据，下面就解密curNum次
+		curNum /= LENGTH;//真正读到curNum个DataType字节的数据，下面就解密curNum次
 		int i;
 		std::cout << "-----------------\n";
 		std::cout << "m_eKey = " << m_key.m_eKey << std::endl;
@@ -95,8 +98,7 @@ void RSA::Decrypt(const char* filename, const char* fileout)//文件解密
 			//每次以datatype为单位进行解密，curnum个datatype字节的数据，共解密curnum次
 			//每次将一个datatype为单位的数据解密成一个字节的数据，写入bufferout缓冲区中
 			bufferout[i] = (char)Encrypt(bufferin[i], m_key.m_dKey, m_key.m_pKey);
-			std::cout << bufferin[i] <<  std::endl;
-			std::cout << bufferout[i] << std::endl;
+			std::cout << bufferin[i] << "  被解密成  " << bufferout[i] << std::endl;
 		}
 		fout.write(bufferout, curNum);
 		//解密curNum次，就得到curNum字节得数据，写入fout文件中
@@ -156,6 +158,7 @@ DataType RSA::GetPrime()//获取素数
 			break;
 		}
 	}
+	//std::cout << "prime = " << prime << std::endl;
 	return prime;
 }
 
@@ -222,20 +225,43 @@ DataType RSA::GetGcd(DataType data1, DataType data2)//获取两个数的最大公约数
 
 void RSA::GetKeys()
 {
-	DataType prime1 = GetPrime();
-	std::cout << "prime1 = " << prime1 << std::endl;
-	DataType prime2 = GetPrime();
-	while (prime1 == prime2)
-	{
-		prime2 = GetPrime();
-	}
-	std::cout << "prime2 = " << prime2 << std::endl;
+	std::ifstream ife(EKEYFILE, std::ifstream::binary);
+	std::ifstream ifd(DKEYFILE, std::ifstream::binary);
+	std::ifstream ifp(PKEYFILE, std::ifstream::binary);
+	int pos = rand() % KEYS;//获取第几个钥匙
+	std::cout << "pos = " << pos << std::endl;
+	ife.clear();//清除上次的偏移标志
+	ifd.clear();
+	ifp.clear();
 
-	DataType orla = GetOrla(prime1, prime2);
+	ife.seekg(pos * LENGTH, std::ios::beg);//将读取指针指向第pos个位置
+	ifd.seekg(pos * LENGTH, std::ios::beg);
+	ifp.seekg(pos * LENGTH, std::ios::beg);
 
-	m_key.m_pKey = GetPKey(prime1, prime2);
-	m_key.m_eKey = GetEKey(orla);
-	m_key.m_dKey = GetDKey(m_key.m_eKey, orla);
+	ife.read((char*)&m_key.m_eKey, LENGTH);//给各个钥匙读取文件中的钥匙
+	ifd.read((char*)&m_key.m_dKey, LENGTH);
+	ifp.read((char*)&m_key.m_pKey, LENGTH);
+	std::cout << "m_eKey = " << m_key.m_eKey << std::endl;
+	std::cout << "m_dKey = " << m_key.m_dKey << std::endl;
+	std::cout << "m_pKey = " << m_key.m_pKey << std::endl;
+	ife.close();
+	ifd.close();
+	ifp.close();
+
+	//DataType prime1 = GetPrime();
+	//std::cout << "prime1 = " << prime1 << std::endl;
+	//DataType prime2 = GetPrime();
+	//while (prime1 == prime2)
+	//{
+	//	prime2 = GetPrime();
+	//}
+	//std::cout << "prime2 = " << prime2 << std::endl;
+
+	//DataType orla = GetOrla(prime1, prime2);
+
+	//m_key.m_pKey = GetPKey(prime1, prime2);
+	//m_key.m_eKey = GetEKey(orla);
+	//m_key.m_dKey = GetDKey(m_key.m_eKey, orla);
 }
 
 Key RSA::GetAllKey()//对外封装访问私有成员的接口

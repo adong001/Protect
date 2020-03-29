@@ -22,11 +22,15 @@ void test_key()
 void test_file()
 {
 	RSA rsa;
+	rsa.ProdureKeyFile();
+	srand((unsigned int)time(NULL));
 	rsa.GetKeys();
+
 	rsa.Encrypt("src.txt", "enc.txt");
 	rsa.Decrypt("enc.txt", "dec.txt");
+	//Encrypt1(rsa, key, "src.txt", "enc.txt");
+	//Decrypt1(rsa,key,"enc.txt", "dec.txt");
 }
-
 
 
 int main()
