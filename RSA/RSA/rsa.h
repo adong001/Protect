@@ -8,8 +8,8 @@
 #include<boost/multiprecision/cpp_int.hpp>
 #include<boost/multiprecision/miller_rabin.hpp>//大素数检测
 #define NUMBER 2048   //一次加密NUMBER个字节大小的数据
-#define OFFSET 256  //钥匙的位数
-#define KEYS 20 //产生钥匙的个数
+#define OFFSET 128  //钥匙的位数
+#define KEYS 5 //产生钥匙的个数
 #define EKEYFILE "./ekey.txt" //产生钥匙的默认文件路径
 #define DKEYFILE "./dkey.txt" //会在第一次产生100把钥匙供以后使用，以后加解密数据不在浪费时间产生素数和钥匙
 #define PKEYFILE "./pkey.txt"

@@ -230,9 +230,9 @@ void RSA::GetKeys()
 	std::ifstream ifp(PKEYFILE, std::ifstream::binary);
 	int pos = rand() % KEYS;//获取第几个钥匙
 	std::cout << "pos = " << pos << std::endl;
-	ife.clear();//清除上次的偏移标志
-	ifd.clear();
-	ifp.clear();
+	//ife.clear();//清除上次的偏移标志
+	//ifd.clear();
+	//ifp.clear();
 
 	ife.seekg(pos * LENGTH, std::ios::beg);//将读取指针指向第pos个位置
 	ifd.seekg(pos * LENGTH, std::ios::beg);
