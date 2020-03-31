@@ -50,6 +50,7 @@ bool FileTool::Write(const std::string& filename, const std::string& body)//向文
 bool DataManager::Insert(const std::string& key, const std::string& val)//插入/更新信息
 {
 	m_backup_list[key] = val;
+	Storage();
 	return true;
 }
 
@@ -108,32 +109,41 @@ bool DataManager::InitLoad()//初始化加载原有数据
 	return true;
 }
 
-bool ClouClient::Start()//主控流程
+bool CloudClient::Start()//主控流程
 {
 	m_data_manage.InitLoad();
-	std::vector<std::string> list;
-	GetBackupFileList(list);//获取所有需要备份的文件名
-	for (int i = 0; i < list.size(); ++i)
+	while (1)
 	{
-		std::string name = list[i];//获取需要备份文件名
-		std::string pathname = m_listen_dir + name;//获取需要备份文件路径名
-		std::string body;
-		FileTool::Read(pathname, body);//读取备份文件内容
-		httplib::Client client(m_srv_ip,m_srv_port);//
-		std::string req_path = "/" + name;//
-		auto rsp = client.Put(req_path.c_str(), body, "application/octet-stream");
-		if (rsp == NULL || (rsp != NULL && rsp->status != 200))//文件上传失败
+		std::vector<std::string> list;
+		GetBackupFileList(list);//获取所有需要备份的文件名
+		for (int i = 0; i < list.size(); ++i)
 		{
-			continue;
+			std::string name = list[i];//获取需要备份文件名
+			std::string pathname = m_listen_dir + name;//获取需要备份文件路径名
+			std::cout << "---------------------------" << std::endl;
+			std::cout << "| " << pathname << "  is need to backup |\n";
+			std::string body;
+			FileTool::Read(pathname, body);//读取备份文件内容
+			httplib::Client client(m_srv_ip, m_srv_port);//实例化http上传请求对象
+			std::string req_path = "/" + name;//
+			auto rsp = client.Put(req_path.c_str(), body, "application/octet-stream");
+			if (rsp == NULL || (rsp != NULL && rsp->status != 200))//文件上传失败
+			{
+				std::cout << pathname << "backup failed\n";
+				continue;
+			}
+			std::string etag;
+			GetEtag(pathname, etag);
+			m_data_manage.Insert(name, etag);//备份成功，插入/更新信息
+			std::cout << "| " << pathname << "backup success |\n";
+			std::cout << "---------------------------\n\n";
 		}
-		std::string etag;
-		GetEtag(pathname,etag);
-		m_data_manage.Insert(name, etag);//备份成功，插入/更新信息
+		Sleep(SLEEP_TIME);
 	}
 	return true;
 }
 
-bool ClouClient::GetBackupFileList(std::vector<std::string>& list)//获取需要备份的文件列表
+bool CloudClient::GetBackupFileList(std::vector<std::string>& list)//获取需要备份的文件列表
 {
 
 	boost::filesystem::directory_iterator begin(m_listen_dir);
@@ -153,12 +163,12 @@ bool ClouClient::GetBackupFileList(std::vector<std::string>& list)//获取需要备份
 		std::string cur_etag;
 		GetEtag(pathname, cur_etag);//获取当前文件etag信息
 		std::string old_etag;
-		data_manage.GetEtag(name, old_etag);//获取之前备份文件etag信息
+		m_data_manage.GetEtag(name, old_etag);//获取之前备份文件etag信息
 
 		//3.与data_manage中保存的原有etag进行比对
-		    //3.1.没有找到原有etag，则新文件需要备份
-		    //3.2.找到原有etag，但是当前的etag和原有的etag不相等，需要备份
-		    //3.3.找到原有etag，并且与当前etag相等，则不需要备份
+		//3.1.没有找到原有etag，则新文件需要备份
+		//3.2.找到原有etag，但是当前的etag和原有的etag不相等，需要备份
+		//3.3.找到原有etag，并且与当前etag相等，则不需要备份
 		if (cur_etag != old_etag)
 		{
 			list.push_back(name);//当前etag与原有的etag不同需要备份
@@ -166,14 +176,12 @@ bool ClouClient::GetBackupFileList(std::vector<std::string>& list)//获取需要备份
 	}
 	return true;
 }
-bool ClouClient::GetEtag(const std::string& pathname, std::string& etag)//计算文件的etag信息
-{	
+bool CloudClient::GetEtag(const std::string& pathname, std::string& etag)//计算文件的etag信息
+{
 	//最好用MD5判断(自定义/ssl库接口)
 	//etag:文件大小-文件最后一次修改时间
 	int64_t fsize = boost::filesystem::file_size(pathname);//文件大小
 	time_t mtime = boost::filesystem::last_write_time(pathname);//最后一次修改时间
 	etag = std::to_string(fsize) + "-" + std::to_string(mtime);
-
-
 	return true;
 }

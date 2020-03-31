@@ -9,8 +9,11 @@
 #include<sstream>
 #include<boost/algorithm/string.hpp>
 #include<boost/filesystem.hpp>
-#define STORE_FILE "./list.backup"
-#define LISTEN_DIR "./backup"
+#define STORE_FILE "./list.backup" //持久化存储文件的路径
+#define LISTEN_DIR "./backup"	//待备份文件的路径
+#define SLEEP_TIME 1000  //每隔1s备份一次文件
+#define SERVER_IP "192.168.178.129" //服务端ip
+#define SERVER_PORT 9000 //服务端port
 
 class FileTool   //文件读写工具类
 {
@@ -37,15 +40,15 @@ public:
 };
 
 
-class ClouClient   //目录监控类
+class CloudClient   //目录监控类
 {
 private:
 	std::string m_srv_ip;//服务端ip和port
 	uint16_t m_srv_port;
 	std::string m_listen_dir;//监控目录名称
-	DataManager m_data_manage;
+	DataManager m_data_manage;//数据管理对象
 public:
-	ClouClient(const std::string& filename, const std::string& store_file
+	CloudClient(const std::string& filename, const std::string& store_file
 		,const std::string& srv_ip,const uint16_t& srv_port) :
 		m_listen_dir(filename),
 		m_data_manage(store_file),
