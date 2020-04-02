@@ -124,7 +124,7 @@ bool CloudClient::Start()//Ö÷¿ØÁ÷³Ì
 			std::cout << "| " << pathname << "  is need to backup |\n";
 			std::string body;
 			FileTool::Read(pathname, body);//¶ÁÈ¡±¸·İÎÄ¼şÄÚÈİ
-			httplib::Client client(m_srv_ip, m_srv_port);//ÊµÀı»¯httpÉÏ´«ÇëÇó¶ÔÏó
+			httplib::Client client(m_srv_ip.c_str(), m_srv_port);//ÊµÀı»¯httpÉÏ´«ÇëÇó¶ÔÏó
 			std::string req_path = "/" + name;//
 			auto rsp = client.Put(req_path.c_str(), body, "application/octet-stream");
 			if (rsp == NULL || (rsp != NULL && rsp->status != 200))//ÎÄ¼şÉÏ´«Ê§°Ü
@@ -156,7 +156,7 @@ bool CloudClient::GetBackupFileList(std::vector<std::string>& list)//»ñÈ¡ĞèÒª±¸·
 		}
 
 		//1.½øĞĞÄ¿Â¼¼à¿Ø£¬»ñÈ¡Ö¸¶¨Ä¿Â¼ÏÂµÄËùÓĞÎÄ¼şÃû³Æ
-		std::string pathname = begin->path.string();//»ñÈ¡ÎÄ¼şÂ·¾¶Ãû
+		std::string pathname = begin->path().string();//»ñÈ¡ÎÄ¼şÂ·¾¶Ãû
 		std::string name = begin->path().filename().string();//»ñÈ¡´¿ÎÄ¼şÃû
 
 		//2.Öğ¸öÎÄ¼ş¼ÆËã×ÔÉíµ±Ç°µÄetag

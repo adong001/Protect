@@ -1,4 +1,5 @@
 #pragma once
+#define _SCL_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #include"httplib.h"
 #include<iostream>
@@ -9,12 +10,8 @@
 #include<sstream>
 #include<boost/algorithm/string.hpp>
 #include<boost/filesystem.hpp>
-#define STORE_FILE "./list.backup" //持久化存储文件的路径
-#define LISTEN_DIR "./backup"	//待备份文件的路径
-#define SLEEP_TIME 1000  //每隔1s备份一次文件
-#define SERVER_IP "192.168.178.129" //服务端ip
-#define SERVER_PORT 9000 //服务端port
 
+#define SLEEP_TIME 1000  //每隔1s备份一次文件
 class FileTool   //文件读写工具类
 {
 public:
